@@ -9,7 +9,7 @@
 using KeyLen = uint32_t;
 
 class Key {
-    static constexpr uint32_t stackLen = 128;
+    static constexpr uint32_t stackLen = 512;
     uint32_t len = 0;
 
     uint8_t *data;
