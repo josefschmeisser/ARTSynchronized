@@ -9,6 +9,7 @@ using namespace std;
 #include "ART/Tree.h"
 
 #include "third_party/profile.hpp"
+#include "zipf.hpp"
 
 /*
 void loadKey(TID tid, Key &key) {
@@ -100,6 +101,31 @@ int main(int argc, char** argv) {
                     (void)ret;
   //                  if (ret != i) { throw; }
     //                assert(ret == i);
+                }
+            },
+            repetitions, {{"approach", approach}, {"dataset", dataset}, {"threads", std::to_string(1)}});
+    }
+
+    {
+        std::vector<uint64_t> skewed(n);
+        std::mt19937 generator;
+        generator.seed(0);
+        zipf_distribution<uint64_t> zipfDistribution(n, 1.25);
+        for (uint64_t i = 0; i < n; ++i) {
+            skewed[i] = zipfDistribution(generator);
+        }
+
+        e.timeAndProfile("lookupSkewed", n,
+            [&]() {
+                auto localThreadInfo = tree.getThreadInfo();
+                for (uint64_t i = 0; i < n; i++) {
+                    Key key;
+                    const auto j = skewed[i];
+                    loadKey(j, key);
+                    auto ret = tree.lookup(key, localThreadInfo); // FIXME
+                    (void)ret;
+  //                  if (ret != j) { throw; }
+    //                assert(ret == j);
                 }
             },
             repetitions, {{"approach", approach}, {"dataset", dataset}, {"threads", std::to_string(1)}});
